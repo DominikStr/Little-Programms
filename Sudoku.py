@@ -396,9 +396,8 @@ def test_one(Name):
     x.printit() 
 
 
-#test_one("escargot")
-
-test_all()
+test_one("escargot")
+#test_all()
 
         
         
