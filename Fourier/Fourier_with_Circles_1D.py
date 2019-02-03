@@ -3,6 +3,10 @@ This code is mostly based on this video by Coding Train:
 https://www.youtube.com/watch?v=Mm2eYfj0SgA&t=1464s
 """
 
+# If you want to use it in a Jupyter Notebook enable:
+#%matplotlib nbagg
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
