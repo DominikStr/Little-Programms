@@ -11,28 +11,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
 from scipy.fftpack import fft
+from scipy.signal import resample
+from scipy import signal
 
+from obspy import *
+from obspy.clients.fdsn import Client
 
 Nframes = 10000000
-Rad = 20
+Rad = 50
 
 WIDTH = 500
 HEIGHT = 200
 LEFT_CENTER = [WIDTH/(3*2), HEIGHT/2]
 
-N =5
+N = 20
 
 #boxcar function
-Function = [-10] * 100 + [10] * 100
+t_ = np.linspace(0, 50, 500, endpoint=False)
+Function = signal.square(0.04*2*np.pi*t_)
 
-#random gaussian distribution
+#random distribution
 #np.random.seed(6)
-#Function = np.random.normal(0,1,200)
+#y = 0
+#Function = []
+#for i in range(200):
+#    Function.append(y)
+#    y += np.random.normal(scale=1)
 
 #sawtooth function
 #Function = []
 #for i in range(200):
 #    Function.append(-1 + i/100) 
+
+
+#test it with earthquake data
+#client = Client("BGR")
+#t1 = UTCDateTime("2011-03-11T05:58:50.000")
+#st = client.get_waveforms("GR", "WET", "", "BHZ", t1, t1 + 0.01 * 60 * 60, 
+#                          attach_response = True)
+#st.remove_response(output="VEL")
+#st.detrend('linear')
+#st.detrend('demean')
+#st.taper(10)
+#Function = st[0].data
+#plt.plot(Function)
+#plt.show()
+
 
 LENGTH = len(Function)
 
@@ -81,13 +105,16 @@ for i in range(N):
 values, = ax.plot([],[],color = "k")
 X = []
 Y = []
+X_r = []
+Y_r = []
 # line to connect circles and plot
 con, = ax.plot([],[], color = "k", lw = 0.5)
 
+real, = ax.plot([],[], color = "g", lw = 1)
 
 
 def init():
-    return tuple(Circles),values, con, tuple(Circle_Lines)
+    return tuple(Circles),values, con, tuple(Circle_Lines), real
 
 def animate(i):
     
@@ -116,15 +143,24 @@ def animate(i):
     con.set_xdata([c[0], WIDTH/3])
     con.set_ydata([c[1], c[1]])
     
-    if len(X)*(100/LENGTH) > (2*WIDTH/3)-50:
+    X_r.append(WIDTH/3+i*(100/LENGTH))
+    Y_r.insert(0, LEFT_CENTER[1] + (-1*Function[i%LENGTH])*Rad )
+    real.set_xdata(X_r)
+    real.set_ydata(Y_r)
+    
+    if len(X)*(100/LENGTH) > (2*WIDTH/3)-5:
         X.pop()
         Y.pop()
+        
+    if len(X_r)*(100/LENGTH) > (2*WIDTH/3)-5:
+        X_r.pop()
+        Y_r.pop()
     
     return tuple(Circles),values, con, tuple(Circle_Lines)
 
 
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-                               frames=Nframes, interval=1)
+                               frames=Nframes, interval=10)
 
 
 
